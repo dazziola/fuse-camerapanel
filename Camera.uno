@@ -48,6 +48,7 @@ public extern(iOS) class Camera
   public void RefreshCamera() {}
 
   public Promise<PictureResult> TakePicture() {
+    debug_log("In camera module");
     var p = new Promise<PictureResult>();
     p.Resolve(new PictureResult("test.jpeg"));
     return p;

@@ -29,7 +29,7 @@ public class CameraExtended : NativeModule
   {
     var func = (Fuse.Scripting.Function)context.GlobalObject["File"];
     var file = (Fuse.Scripting.Object)func.Construct();
-    file["path"] = result.Path+" here we are!";
+    file["path"] = result.Path;
     file["name"] = Path.GetFileName(result.Path);
     return file;
   }
