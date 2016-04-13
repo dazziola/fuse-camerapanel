@@ -19,6 +19,7 @@ public extern (!iOS && !Android) class Camera
   public void Start() {}
   public void Stop() {}
   public void RefreshCamera() {}
+  public void CaptureStill() {}
   public event EventHandler FrameAvailable;
   public int2 Size { get { return int2(0,0); } }
   public VideoTexture VideoTexture { get { return null; } }
@@ -77,6 +78,11 @@ public extern(iOS) class Camera
     if (handler != null) handler(this, args);
   }
 
+  public void CaptureStill() {
+    debug_log("Starting Capture Still...");
+    CameraImpl.captureStill(_handle);
+  }
+
   public Camera () {
     debug_log "Camera.ctor";
     _handle = CameraImpl.allocateCamera();
@@ -101,6 +107,9 @@ internal class CameraImpl
 
   [TargetSpecificImplementation]
   public static extern ObjC.ID allocateCamera();
+
+  [TargetSpecificImplementation]
+  public static extern void captureStill(ObjC.ID camera);
 
   [TargetSpecificImplementation]
   public static extern void initialize(ObjC.ID camera);

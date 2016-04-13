@@ -69,6 +69,12 @@
             [fci addUpdateListener: $1];
           </Body>
         </Method>
+				<Method Signature="captureStill(ObjC.ID)">
+					<Body>
+						FuseCameraImpl *fci = (FuseCameraImpl *)$0;
+						[fci captureStill];
+					</Body>
+				</Method>
     </Type>
 </Extensions>
 </Package>

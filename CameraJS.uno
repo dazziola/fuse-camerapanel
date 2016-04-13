@@ -12,6 +12,7 @@ public class CameraExtended : NativeModule
   {
     AddMember(new NativePromise<PictureResult, Fuse.Scripting.Object>("takePicture", TakePicture, Converter));
     AddMember(new NativeFunction("refreshCamera", (NativeCallback)this.RefreshCamera));
+    AddMember(new NativeFunction("captureStill", (NativeCallback)this.CaptureStill));
   }
 
   Future<PictureResult> TakePicture(object[] args)
@@ -22,6 +23,12 @@ public class CameraExtended : NativeModule
   object RefreshCamera(Context c, object[] args)
   {
     Camera.RefreshCamera();
+    return null;
+  }
+
+  object CaptureStill(Context c, object[] args)
+  {
+    Camera.CaptureStill();
     return null;
   }
 

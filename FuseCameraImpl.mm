@@ -2,9 +2,9 @@
      File: FuseCameraImpl.m
  Abstract: Fuse Glue.
   Version: 1.0
- 
+
  Copyright (C) 2015 Bjørn-Olav Strand All Rights Reserved.
- 
+
  */
 
 #import <CoreVideo/CVOpenGLESTextureCache.h>
@@ -14,12 +14,12 @@
 @interface FuseCameraImpl () {
     size_t _textureWidth;
     size_t _textureHeight;
-    
+
     CVOpenGLESTextureRef _textureHandle;
     int _textureOrientation;
-    
+
     NSString *_sessionPreset;
-    
+
     AVCaptureSession *_session;
     CVOpenGLESTextureCacheRef _videoTextureCache;
 
@@ -57,13 +57,13 @@
 
 - (void)startCam:(int)device
 {
-    _sessionPreset = AVCaptureSessionPreset640x480;        
+    _sessionPreset = AVCaptureSessionPreset640x480;
 
     [self setupAVCapture:device];
 }
 
 - (void)stopCam
-{    
+{
     [_session stopRunning];
     [self tearDownAVCapture];
 }
@@ -74,22 +74,26 @@
     uRetain(_callback);
 }
 
+- (void)captureStill
+{
 
-- (void)captureOutput:(AVCaptureOutput *)captureOutput 
-didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer 
+}
+
+- (void)captureOutput:(AVCaptureOutput *)captureOutput
+didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
        fromConnection:(AVCaptureConnection *)connection
 {
     if (_textureHandle)
         CFRelease(_textureHandle);
-        
+
      if (_videoTextureCache)
         CVOpenGLESTextureCacheFlush(_videoTextureCache, 0);
-    
+
     uAutoReleasePool pool; // Do we need this???
 	CVPixelBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
     _textureWidth = CVPixelBufferGetWidth(pixelBuffer);
     _textureHeight = CVPixelBufferGetHeight(pixelBuffer);
-    
+
     if (!_videoTextureCache)
     {
         NSLog(@"No video texture cache");
@@ -131,7 +135,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     glBindTexture(CVOpenGLESTextureGetTarget(_textureHandle), CVOpenGLESTextureGetName(_textureHandle));
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    
+
     // CVBufferRelease(pixelBuffer);
     // Set Texture of Camera
     int _th = CVOpenGLESTextureGetName(_textureHandle);
@@ -161,10 +165,10 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     //-- Setup Capture Session.
     _session = [[AVCaptureSession alloc] init];
     [_session beginConfiguration];
-    
+
     //-- Set preset session size.
     [_session setSessionPreset:_sessionPreset];
-    
+
     //-- Creata a video device and input from that Device.  Add the input to the capture session.
     AVCaptureDevice * videoDevice = nil;
     if (devicetype == 2) {
@@ -182,36 +186,36 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 
     if(videoDevice == nil)
         assert(0);
-    
+
     //-- Add the device to the session.
-    NSError *error;        
+    NSError *error;
     AVCaptureDeviceInput *input = [AVCaptureDeviceInput deviceInputWithDevice:videoDevice error:&error];
     if(error)
         assert(0);
-    
+
     [_session addInput:input];
-    
+
     //-- Create the output for the capture session.
     AVCaptureVideoDataOutput * dataOutput = [[AVCaptureVideoDataOutput alloc] init];
     [dataOutput setAlwaysDiscardsLateVideoFrames:YES]; // Probably want to set this to NO when recording
-    
+
     //-- Set to YUV420.
-    [dataOutput setVideoSettings:[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_32BGRA] 
+    [dataOutput setVideoSettings:[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_32BGRA]
                                                              forKey:(id)kCVPixelBufferPixelFormatTypeKey]]; // Necessary for manual preview
-    
+
     // Set dispatch to be on the main thread so OpenGL can do things with the data
-    [dataOutput setSampleBufferDelegate:self queue:dispatch_get_main_queue()];        
-    
+    [dataOutput setSampleBufferDelegate:self queue:dispatch_get_main_queue()];
+
     [_session addOutput:dataOutput];
     [_session commitConfiguration];
-    
+
     [_session startRunning];
 }
 
 - (void)tearDownAVCapture
 {
     [self cleanUpTextures];
-    
+
     CFRelease(_videoTextureCache);
 }
 
